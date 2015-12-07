@@ -1,0 +1,42 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".LocationActivity">
+
+    <include
+        android:id="@+id/tool_bar"
+        layout="@layout/tool_bar"
+        ></include>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <fragment
+            xmlns:map="http://schemas.android.com/apk/res-auto"
+
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.sourcebits.footin.LocationActivity" />
+
+        <AutoCompleteTextView
+
+            android:id="@+id/reference_places"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:hint="@string/str_atv_places"
+            android:singleLine="true"
+            android:layout_marginTop="30dp"
+            android:textColor="@color/colorPrimary">
+        <requestFocus />
+
+        </AutoCompleteTextView>
+
+
+    </RelativeLayout>
+</LinearLayout>

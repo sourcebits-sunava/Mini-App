@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FootIn</string>
+    <string name="title_activity_location">Map</string>
+    <string name="str_atv_places">Enter Place Here</string>
+</resources>
