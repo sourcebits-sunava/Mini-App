@@ -2,13 +2,13 @@ package com.sourcebits.footin;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,7 +20,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -72,7 +71,7 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
         toolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         setActionBar(toolbar);
         autoCompView = (AutoCompleteTextView)findViewById(R.id.reference_places);
-
+        autoCompView.setVisibility(View.INVISIBLE);
         //replace GOOGLE MAP fragment in this Activity
         replaceMapFragment();
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -86,6 +85,15 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
         autoCompView.setAdapter(new GooglePlacesAutocompleteAdapter(this, R.layout.list_item));
 
         autoCompView.setOnItemClickListener(this);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),Favourite.class);
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -212,9 +220,84 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
 
         String str = (String) adapterView.getItemAtPosition(position);
 
+        //getLatLongFromGivenAddress(str);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
 
     }
+
+
+    public void getLatLongFromGivenAddress(String youraddress)
+    {
+        String uri = "http://maps.google.com/maps/api/geocode/json?address=" + youraddress + "&sensor=false";
+        HttpURLConnection conn = null;
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            URL url = new URL(uri);
+            conn = (HttpURLConnection) url.openConnection();
+            InputStreamReader in = new InputStreamReader(conn.getInputStream());
+            int b;
+            while ((b = in.read()) != -1) {
+                stringBuilder.append((char) b);
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject = new JSONObject(stringBuilder.toString());
+
+            Double lng = ((JSONArray)jsonObject.get("results")).getJSONObject(0)
+                    .getJSONObject("geometry").getJSONObject("location")
+                    .getDouble("lng");
+
+            Double lat = ((JSONArray)jsonObject.get("results")).getJSONObject(0)
+                    .getJSONObject("geometry").getJSONObject("location")
+                    .getDouble("lat");
+
+            Log.d("latitude", String.valueOf(lat));
+            Log.d("longitude", String.valueOf(lng));
+
+            Toast.makeText(this, lat +"  " +lng , Toast.LENGTH_SHORT).show();
+            LatLng loc = new LatLng(lat,lng);
+
+            if(marker!=null)
+                marker.remove();
+            marker = map.addMarker(new MarkerOptions().position(loc));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+            Toast.makeText(getApplicationContext(), "You are at [" + lng + " ; " + lat + " ]", Toast.LENGTH_SHORT).show();
+            map.setInfoWindowAdapter(new MarkerInfoWindowAdapter());
+            //get current address by invoke an AsyncTask object
+            new GetAddressTask(LocationActivity.this).execute(String.valueOf(lat), String.valueOf(lng));
+            if (map != null)
+            {
+                map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+                {
+                    @Override
+                    public boolean onMarkerClick(com.google.android.gms.maps.model.Marker marker)
+                    {
+                        marker.showInfoWindow();
+                        return true;
+                    }
+                });
+            }
+            else
+                Toast.makeText(getApplicationContext(), "Unable to create Maps", Toast.LENGTH_SHORT).show();
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
 
     public static ArrayList autocomplete(String input) {
 
