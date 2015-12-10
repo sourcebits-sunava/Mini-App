@@ -8,7 +8,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +19,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -46,7 +47,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-public class LocationActivity extends Activity implements LocationListener,OnItemClickListener
+public class LocationActivity extends Activity implements LocationListener,OnItemClickListener,GoogleMap.OnMapLongClickListener,GoogleMap.OnInfoWindowClickListener
 {
     private static final String LOG_TAG = "Google Places Autocomplete";
     private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
@@ -61,26 +62,42 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
     Marker marker;
     String address;
     private Toolbar toolbar;
+    ImageView markerIcon;
     AutoCompleteTextView autoCompView;
+    LinearLayout editTextLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_location);
+        setContentView(R.layout.locationactivity);
 
         toolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
+        toolbar.setLogo(R.drawable.ic_black_foot);
         setActionBar(toolbar);
+
+
+        // Linear layout
+        editTextLayout =(LinearLayout)findViewById(R.id.EditTextLayout);
+        editTextLayout.setVisibility(View.INVISIBLE);
+
+
+        //autocompleteview implmented
         autoCompView = (AutoCompleteTextView)findViewById(R.id.reference_places);
-        autoCompView.setVisibility(View.INVISIBLE);
+        //autoCompView.setVisibility(View.INVISIBLE);
+
+
         //replace GOOGLE MAP fragment in this Activity
         replaceMapFragment();
+
+        //search for Network Provider and GPS Providers
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,6000,10,this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,60000,10,this);
         else if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 6000, 10, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 10, this);
         else
             Toast.makeText(getApplicationContext(),"Enable Location",Toast.LENGTH_SHORT).show();
+
 
         autoCompView.setAdapter(new GooglePlacesAutocompleteAdapter(this, R.layout.list_item));
 
@@ -90,8 +107,8 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),Favourite.class);
-                startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(),FavouriteActivity.class);
+                startActivityForResult(intent, RESULT_OK);
             }
         });
 
@@ -114,6 +131,7 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
 
         //set "listener" for changing my location
         //map.setOnMyLocationChangeListener(myLocationChangeListener());
+
     }
 
     /*private GoogleMap.OnMyLocationChangeListener myLocationChangeListener() {
@@ -129,6 +147,8 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
     public void callBackDataFromAsyncTask(String address)
     {
         this.address = address;
+        if(address==null)
+            Toast.makeText(getApplicationContext(),"Please connect to wifi or data connectivity",Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -180,8 +200,53 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
 
     }
 
+
+
+
+
+    @Override
+    public void onMapLongClick(LatLng location) {
+
+        double longitude = location.longitude;
+        double latitude = location.latitude;
+        if(marker!=null)
+            marker.remove();
+        marker = map.addMarker(new MarkerOptions().position(location));
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 16.0f));
+        Toast.makeText(getApplicationContext(), "You are at [" + longitude + " ; " + latitude + " ]", Toast.LENGTH_SHORT).show();
+        map.setInfoWindowAdapter(new MarkerInfoWindowAdapter());
+        //get current address by invoke an AsyncTask object
+        new GetAddressTask(LocationActivity.this).execute(String.valueOf(latitude), String.valueOf(longitude));
+        if (map != null)
+        {
+            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+            {
+                @Override
+                public boolean onMarkerClick(com.google.android.gms.maps.model.Marker marker)
+                {
+                    marker.showInfoWindow();
+                    return true;
+                }
+            });
+        }
+        else
+            Toast.makeText(getApplicationContext(), "Unable to create Maps", Toast.LENGTH_SHORT).show();
+
+
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+
+    }
+
+
+    //MarkerInfo class
+
+
     public class MarkerInfoWindowAdapter implements GoogleMap.InfoWindowAdapter
     {
+
         public MarkerInfoWindowAdapter()
         {
         }
@@ -198,20 +263,23 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
             View v  = getLayoutInflater().inflate(R.layout.infomarker, null);
 
             TextView markerLabel = (TextView)v.findViewById(R.id.marker_label);
+            markerIcon = (ImageView)v.findViewById(R.id.marker_icon);
+
             markerLabel.setText(address);
-            autoCompView.setVisibility(View.INVISIBLE);
+            editTextLayout.setVisibility(View.INVISIBLE);
 
 
             return v;
         }
+
+
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+
+
+
+
+
 
     ////
 
@@ -307,7 +375,7 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
         try {
             StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
             sb.append("?key=" + API_KEY);
-            sb.append("&components=country:gr");
+            sb.append("&components=country:in");
             sb.append("&input=" + URLEncoder.encode(input, "utf8"));
 
             URL url = new URL(sb.toString());
@@ -441,14 +509,21 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
 
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_search)
         {
-            autoCompView.setVisibility(View.VISIBLE);
+            editTextLayout.setVisibility(View.VISIBLE);
             InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
             imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
 

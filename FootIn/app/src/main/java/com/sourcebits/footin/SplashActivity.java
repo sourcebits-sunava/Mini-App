@@ -7,28 +7,27 @@ import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class Splash extends Activity
+public class SplashActivity extends Activity
 {
 
-    Boolean flag = true;
-    Handler handler;
-    Runnable thread;
+    private Boolean mFlag = true;
+    private Handler mHandler;
+    private Runnable mRunnableWaitingThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.splash);
+        setContentView(R.layout.splashactivity);
 
-        thread = new Runnable()
+        mRunnableWaitingThread = new Runnable()
         {
             @Override
             public void run()
             {
                 try {
-                    if (flag) {
+                    if (mFlag) {
                         Intent intent = new Intent(getBaseContext(),LocationActivity.class);
                         startActivity(intent);
                         finish();
@@ -41,27 +40,8 @@ public class Splash extends Activity
             }
         };
 
-        handler = new Handler();
-        handler.postDelayed(thread,5000 );
-
-
-		/*Thread thread = new Thread() {
-			public void run() {
-				try {
-					if (flag) {
-						sleep(3000);
-						Intent intent = new Intent(getBaseContext(),
-								ActivityActivity.class);
-						startActivity(intent);
-						finish();
-					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		};
-		thread.start();*/
-
+        mHandler = new Handler();
+        mHandler.postDelayed(mRunnableWaitingThread,3000 );
 
 
     }
@@ -70,16 +50,14 @@ public class Splash extends Activity
     protected void onPause()
     {
         super.onPause();
-        flag = false;
-        handler.removeCallbacks(thread);
+        mHandler.removeCallbacks(mRunnableWaitingThread);
     }
 
     @Override
-    protected void onRestart()
+    protected void onResume()
     {
-        super.onRestart();
-        flag =true;
-        handler.postDelayed(thread, 1000);
+        super.onResume();
+        mHandler.postDelayed(mRunnableWaitingThread , 3000);
     }
 
 }

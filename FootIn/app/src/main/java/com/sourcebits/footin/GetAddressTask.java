@@ -129,10 +129,12 @@ public class GetAddressTask extends AsyncTask<String, Void, String>
 
                 }
 
-                currentLocation = Country + "  "+ State+ " , " +Address1 + "," + County + "," + City + "," + PIN;
+                currentLocation = Address1 + "," + County + "," + City + "," + PIN + "," + Country + "  "+ State;
 
             }
         } catch (Exception e) {
+
+            return null;
 
         }
         return currentLocation;
@@ -147,6 +149,7 @@ public class GetAddressTask extends AsyncTask<String, Void, String>
      */
     @Override
     protected void onPostExecute(String address) {
+
         // Call back Data and Display the current address in the UI
         activity.callBackDataFromAsyncTask(address);
     }

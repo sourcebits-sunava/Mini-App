@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">FootIn</string>
-    <string name="title_activity_location">Map</string>
+    <string name="title_activity_location">Foot In</string>
+    <string name="title_activity_favourite">Favourite</string>
     <string name="str_atv_places">Enter Place Here</string>
     <string name="title_activity_main">MainActivity</string>
 </resources>

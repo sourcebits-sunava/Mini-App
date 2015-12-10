@@ -24,20 +24,44 @@
             android:layout_height="match_parent"
             tools:context="com.sourcebits.footin.LocationActivity" />
 
-        <AutoCompleteTextView
-
-            android:id="@+id/reference_places"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/EditTextLayout"
+            android:orientation="horizontal"
+            android:layout_marginTop="30dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:hint="@string/str_atv_places"
-            android:singleLine="true"
-            android:layout_marginTop="30dp"
-            android:textColor="@color/colorPrimary">
-        <requestFocus />
+            android:background="#ffffff">
 
-        </AutoCompleteTextView>
+
+            <AutoCompleteTextView
+
+                android:id="@+id/reference_places"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/str_atv_places"
+                android:textColorHint="@color/button_material_dark"
+                android:singleLine="true"
+                android:layout_marginLeft="5dp"
+                android:background="#00000000"
+                android:textColor="@color/colorPrimary"
+                android:layout_weight="1">
+                <requestFocus />
+
+            </AutoCompleteTextView>
+
+            <ImageView
+                android:id="@+id/delete_icon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_delete"
+                android:layout_weight="9"
+                />
+
+
+
+        </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
@@ -45,8 +69,7 @@
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_more"
             android:layout_alignParentBottom="true"
-            android:layout_alignEnd="@+id/reference_places"
-            android:layout_marginBottom="40dp" />
+            android:layout_alignParentEnd="true" />
 
 
         </RelativeLayout>

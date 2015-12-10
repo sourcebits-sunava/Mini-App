@@ -8,27 +8,17 @@
         android:minSdkVersion="21"
         android:targetSdkVersion="22" />
 
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the 'MyLocation' functionality.
-    -->
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="com.sourcebits.splashscreen.permission.MAPS_RECIEVE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.gms.version"
@@ -37,7 +27,7 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCUktH9SKzeK4XN7z2BwTHo5RbAHg3a85w" />
 
-        <activity android:name=".Splash">
+        <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -57,8 +47,8 @@
             android:name=".LocationActivity"
             android:label="@string/title_activity_location" />
         <activity
-            android:name=".Favourite"
-            android:label="@string/title_activity_main" />
+            android:name=".FavouriteActivity"
+            android:label="@string/title_activity_favourite" />
     </application>
 
 </manifest>
