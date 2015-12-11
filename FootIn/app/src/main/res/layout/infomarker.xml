@@ -41,14 +41,14 @@
 
             <ImageView
                 android:id="@+id/marker_icon"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_blue_foot_th"
                 android:layout_weight="1"
                 android:onClick="true"/>
             <ImageView
                 android:id="@+id/direction_icon"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_nav_direction"
                 android:layout_weight="1"

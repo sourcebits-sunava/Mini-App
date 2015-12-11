@@ -47,12 +47,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-public class LocationActivity extends Activity implements LocationListener,OnItemClickListener,GoogleMap.OnMapLongClickListener,GoogleMap.OnInfoWindowClickListener
+public class LocationActivity extends Activity implements LocationListener,OnItemClickListener,GoogleMap.OnInfoWindowClickListener
 {
-    private static final String LOG_TAG = "Google Places Autocomplete";
-    private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
-    private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
-    private static final String OUT_JSON = "/json";
+
 
     private static final String API_KEY = "AIzaSyBogzNC5KMeBPU7aMWXM885GlXwlWOqNMs";
 
@@ -63,8 +60,12 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
     String address;
     private Toolbar toolbar;
     ImageView markerIcon;
+
     AutoCompleteTextView autoCompView;
     LinearLayout editTextLayout;
+    private static ArrayList<String> placeID = null;
+    private Double getLatitude;
+    private Double getLongitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,18 +73,16 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
         setContentView(R.layout.locationactivity);
 
         toolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
-        toolbar.setLogo(R.drawable.ic_black_foot);
+        toolbar.setLogo(R.drawable.ic_like);
         setActionBar(toolbar);
 
-
-        // Linear layout
-        editTextLayout =(LinearLayout)findViewById(R.id.EditTextLayout);
+        //edittext layout
+        editTextLayout = (LinearLayout)findViewById(R.id.editTextLayout);
         editTextLayout.setVisibility(View.INVISIBLE);
-
 
         //autocompleteview implmented
         autoCompView = (AutoCompleteTextView)findViewById(R.id.reference_places);
-        //autoCompView.setVisibility(View.INVISIBLE);
+
 
 
         //replace GOOGLE MAP fragment in this Activity
@@ -92,9 +91,9 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
         //search for Network Provider and GPS Providers
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,60000,10,this);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,600000,10,this);
         else if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 10, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 600000, 10, this);
         else
             Toast.makeText(getApplicationContext(),"Enable Location",Toast.LENGTH_SHORT).show();
 
@@ -108,11 +107,12 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),FavouriteActivity.class);
-                startActivityForResult(intent, RESULT_OK);
+                startActivity(intent);
             }
         });
 
     }
+
 
     private void replaceMapFragment()
     {
@@ -201,40 +201,6 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
     }
 
 
-
-
-
-    @Override
-    public void onMapLongClick(LatLng location) {
-
-        double longitude = location.longitude;
-        double latitude = location.latitude;
-        if(marker!=null)
-            marker.remove();
-        marker = map.addMarker(new MarkerOptions().position(location));
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 16.0f));
-        Toast.makeText(getApplicationContext(), "You are at [" + longitude + " ; " + latitude + " ]", Toast.LENGTH_SHORT).show();
-        map.setInfoWindowAdapter(new MarkerInfoWindowAdapter());
-        //get current address by invoke an AsyncTask object
-        new GetAddressTask(LocationActivity.this).execute(String.valueOf(latitude), String.valueOf(longitude));
-        if (map != null)
-        {
-            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
-            {
-                @Override
-                public boolean onMarkerClick(com.google.android.gms.maps.model.Marker marker)
-                {
-                    marker.showInfoWindow();
-                    return true;
-                }
-            });
-        }
-        else
-            Toast.makeText(getApplicationContext(), "Unable to create Maps", Toast.LENGTH_SHORT).show();
-
-
-    }
-
     @Override
     public void onInfoWindowClick(Marker marker) {
 
@@ -288,7 +254,19 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
 
         String str = (String) adapterView.getItemAtPosition(position);
 
-        //getLatLongFromGivenAddress(str);
+        //getLatLongFromGivenAddress(placeID.get(position));
+
+
+        //to point marker to the place in the auto view
+        new GetAddressFromAutoView(LocationActivity.this).execute(placeID.get(position));
+
+
+
+
+
+
+
+
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
 
@@ -296,15 +274,56 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
 
     }
 
-
-    public void getLatLongFromGivenAddress(String youraddress)
+    public void callBackData(Double latitude,Double longitude)
     {
-        String uri = "http://maps.google.com/maps/api/geocode/json?address=" + youraddress + "&sensor=false";
+        this.getLatitude = latitude;
+        this.getLongitude = longitude;
+
+        if(latitude == null || longitude == null )
+            Toast.makeText(getApplicationContext(),"Connection lost",Toast.LENGTH_SHORT).show();
+
+        if(marker!=null)
+            marker.remove();
+        LatLng loc = new LatLng(getLatitude,getLongitude);
+        marker = map.addMarker(new MarkerOptions().position(loc));
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+        Toast.makeText(getApplicationContext(), "You are at [" + getLongitude + " ; " + getLatitude + " ]", Toast.LENGTH_SHORT).show();
+        map.setInfoWindowAdapter(new MarkerInfoWindowAdapter());
+        //get current address by invoke an AsyncTask object
+        new GetAddressTask(LocationActivity.this).execute(String.valueOf(getLatitude), String.valueOf(getLongitude));
+        if (map != null)
+        {
+            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+            {
+                @Override
+                public boolean onMarkerClick(com.google.android.gms.maps.model.Marker marker)
+                {
+                    marker.showInfoWindow();
+                    return true;
+                }
+            });
+        }
+        else
+            Toast.makeText(getApplicationContext(), "Unable to create Maps", Toast.LENGTH_SHORT).show();
+
+
+    }
+
+
+    public void getLatLongFromGivenAddress(String placeID)
+    {
+        String uri = "https://maps.googleapis.com/maps/api/place/details/json?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4&key=AIzaSyBogzNC5KMeBPU7aMWXM885GlXwlWOqNMs";
+
+        //StringBuilder uri = new StringBuilder("https://maps.googleapis.com/maps/api/place/details/json");
+        //uri.append("?placeid="+placeID);
+        //uri.append("&key=" + API_KEY);
+
+
         HttpURLConnection conn = null;
         StringBuilder stringBuilder = new StringBuilder();
 
         try {
-            URL url = new URL(uri);
+            URL url = new URL(uri.toString());
             conn = (HttpURLConnection) url.openConnection();
             InputStreamReader in = new InputStreamReader(conn.getInputStream());
             int b;
@@ -367,7 +386,14 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
 
 
 
+
+
     public static ArrayList autocomplete(String input) {
+
+        String LOG_TAG = "Google Places Autocomplete";
+        String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
+        String TYPE_AUTOCOMPLETE = "/autocomplete";
+        String OUT_JSON = "/json";
 
         ArrayList resultList = null;
         HttpURLConnection conn = null;
@@ -411,12 +437,17 @@ public class LocationActivity extends Activity implements LocationListener,OnIte
             // Extract the Place descriptions from the results
 
             resultList = new ArrayList(predsJsonArray.length());
+            placeID = new ArrayList<String>(predsJsonArray.length());
 
             for (int i = 0; i < predsJsonArray.length(); i++)
             {
                 System.out.println(predsJsonArray.getJSONObject(i).getString("description"));
 
+                System.out.println(predsJsonArray.getJSONObject(i).getString("id"));
+
                 System.out.println("============================================================");
+
+                placeID.add(predsJsonArray.getJSONObject(i).getString("id"));
 
                 resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
 

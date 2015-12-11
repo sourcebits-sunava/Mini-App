@@ -45,7 +45,7 @@ public class FavouriteActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), LocationActivity.class);
-                setResult(RESULT_OK,intent);
+                startActivity(intent);
             }
         });
 

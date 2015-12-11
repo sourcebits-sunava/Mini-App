@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".LocationActivity">
 
@@ -27,13 +28,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/EditTextLayout"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
             android:orientation="horizontal"
-            android:layout_marginTop="30dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:background="#ffffff">
-
+            android:layout_marginTop="50dp"
+            android:background="#FFFFFF"
+            android:id="@+id/editTextLayout">
 
             <AutoCompleteTextView
 
@@ -41,35 +41,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/str_atv_places"
-                android:textColorHint="@color/button_material_dark"
-                android:singleLine="true"
-                android:layout_marginLeft="5dp"
                 android:background="#00000000"
-                android:textColor="@color/colorPrimary"
-                android:layout_weight="1">
+                android:textColorHint="@color/common_action_bar_splitter"
+                android:layout_weight="1"
+                android:textColor="@color/colorPrimary">
                 <requestFocus />
 
             </AutoCompleteTextView>
+
 
             <ImageView
                 android:id="@+id/delete_icon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_delete"
-                android:layout_weight="9"
+                android:layout_weight="8"
                 />
 
 
-
         </LinearLayout>
+
+
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_more"
+            android:src="@drawable/ic_heart_fill"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            app:backgroundTint="#b4a7d6ff"/>
 
 
         </RelativeLayout>
